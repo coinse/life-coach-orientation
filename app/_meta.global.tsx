@@ -17,7 +17,7 @@ export default {
     },
     docs: {
         type: 'page',
-        title: 'Check-in',
+        title: '사전평가',
         items: DOCS_ITEMS,
         theme: {
             timestamp: false,
