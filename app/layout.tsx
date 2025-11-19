@@ -55,7 +55,6 @@ export default async function RootLayout({children}) {
             pageMap={pageMap}
             editLink={<></>}
             feedback={{ content: null }}
-            navigation={false}
             footer={footer}
             search={<NextraSearchDialog pages={pages}/>}
             // ... Your additional layout options
