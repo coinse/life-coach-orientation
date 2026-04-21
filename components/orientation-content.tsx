@@ -13,14 +13,15 @@ export function OrientationContent() {
       : 'https://www.youtube.com/embed/T_yPIJ7TjKU'
   return (
     <div className="flex flex-col gap-4 mt-5">
-      <iframe
-        width="720" 
-        height="405" 
-        src={videoSrc} 
-        title="YouTube video player" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        allowFullScreen>
-      </iframe>
+      <div className="w-full max-w-[720px] overflow-hidden rounded-md aspect-video">
+        <iframe
+          className="h-full w-full"
+          src={videoSrc}
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
       <a
         href={orientationLink}
         target="_blank"
