@@ -3,8 +3,8 @@ const variant = process.env.NEXT_PUBLIC_HOME_ACTION_VARIANT ?? process.env.HOME_
 export function OrientationContent() {
   const orientationLink =
     variant === 'sham'
-      ? 'https://www.notion.so/greenmon/34994abf6b9580ff8173f70f243cc276?source=copy_link'
-      : 'https://www.notion.so/greenmon/34994abf6b95803c95ffebda1e36d37a?source=copy_link'
+      ? 'https://greenmon.notion.site/34994abf6b9580ff8173f70f243cc276?source=copy_link'
+      : 'https://greenmon.notion.site/34994abf6b95803c95ffebda1e36d37a?source=copy_link'
 
 
   const videoSrc = 
