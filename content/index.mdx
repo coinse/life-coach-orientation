@@ -4,7 +4,8 @@ description: SIA 연구 설명 및 동의 페이지
 ---
 
 import {Steps, Cards} from 'nextra/components'
-import { HomeStartAction } from '@/components/home-start-action'
+import { ConfirmButton } from '@/components/confirm-button'
+import { OrientationContent } from '@/components/orientation-content'
 
 
 # 건강한 생활습관 증진을 위한 동기강화 기반 디지털 프로그램의 효과성 평가
@@ -30,12 +31,13 @@ import { HomeStartAction } from '@/components/home-start-action'
 
     아래 안내에 따라 자료를 모두 확인한 후, '사전 평가 시작하기' 버튼을 눌러주세요.  
 
-    (사용자 집단에 따라 동영상 또는 카드뉴스가 제공됩니다.)
+    <OrientationContent />
 
     ### 사전 평가 시작하기
     오리엔테이션 자료를 모두 확인하셨다면, 아래 **사전 평가 시작하기** 버튼을 눌러주세요.
     
-    <HomeStartAction />
+
+    <ConfirmButton href="/docs" label="사전 평가 시작하기 ✏️" />
 
 </Steps>
 
