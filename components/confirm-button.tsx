@@ -8,10 +8,20 @@ interface ConfirmButtonProps {
 
 export function ConfirmButton({ href, label = "확인했습니다" }: ConfirmButtonProps) {
   const router = useRouter()
+  const isExternalLink = /^https?:\/\//.test(href)
+
+  const handleClick = () => {
+    if (isExternalLink) {
+      window.open(href, '_blank', 'noopener,noreferrer')
+      return
+    }
+
+    router.push(href)
+  }
 
   return (
     <button
-      onClick={() => router.push(href)}
+      onClick={handleClick}
       className="
         mt-10 px-6 py-3 rounded-lg
         bg-blue-600 text-white font-medium

@@ -20,6 +20,7 @@ export default {
         title: '사전평가',
         items: DOCS_ITEMS,
         theme: {
+            toc: false,
             timestamp: false,
             collapsed: true,
         }
