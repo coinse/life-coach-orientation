@@ -196,8 +196,8 @@ export function OrientationContent() {
 
   const videoSrc =
     variant === 'sham'
-      ? 'https://www.youtube.com/embed/pK3cnKzm0Go'
-      : 'https://www.youtube.com/embed/T_yPIJ7TjKU'
+      ? 'https://www.youtube.com/embed/8OcHCj4WBbU'
+      : 'https://www.youtube.com/embed/LWkAzTB2n28'
 
   const activeManual =
     variant === 'sham'
