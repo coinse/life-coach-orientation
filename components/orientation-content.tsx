@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { type TouchEvent, useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const variant = process.env.NEXT_PUBLIC_HOME_ACTION_VARIANT ?? process.env.HOME_ACTION_VARIANT ?? 'intervention'
@@ -24,6 +24,8 @@ type ManualCardSliderProps = {
 function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) {
   const [currentCard, setCurrentCard] = useState(0)
   const sliderRef = useRef<HTMLDivElement | null>(null)
+  const programmaticScrollTargetRef = useRef<number | null>(null)
+  const touchStartRef = useRef<{ x: number; y: number; card: number } | null>(null)
 
   const scrollToCard = (index: number) => {
     const slider = sliderRef.current
@@ -32,11 +34,54 @@ function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) 
     const nextIndex = Math.max(0, Math.min(index, cards.length - 1))
     const cardWidth = slider.clientWidth
 
+    programmaticScrollTargetRef.current = nextIndex
+    setCurrentCard(nextIndex)
     slider.scrollTo({
       left: cardWidth * nextIndex,
       behavior: 'smooth'
     })
-    setCurrentCard(nextIndex)
+  }
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0]
+    if (!touch) return
+
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      card: currentCard
+    }
+  }
+
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    const touchStart = touchStartRef.current
+    const touch = event.touches[0]
+    if (!touchStart || !touch) return
+
+    const deltaX = touch.clientX - touchStart.x
+    const deltaY = touch.clientY - touchStart.y
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 8) {
+      event.preventDefault()
+    }
+  }
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const touchStart = touchStartRef.current
+    const touch = event.changedTouches[0]
+    touchStartRef.current = null
+
+    if (!touchStart || !touch) return
+
+    const deltaX = touch.clientX - touchStart.x
+    const deltaY = touch.clientY - touchStart.y
+
+    if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY)) {
+      scrollToCard(touchStart.card)
+      return
+    }
+
+    scrollToCard(touchStart.card + (deltaX < 0 ? 1 : -1))
   }
 
   useEffect(() => {
@@ -44,6 +89,17 @@ function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) 
     if (!slider) return
 
     const handleScroll = () => {
+      const programmaticScrollTarget = programmaticScrollTargetRef.current
+      if (programmaticScrollTarget !== null) {
+        const targetScrollLeft = slider.clientWidth * programmaticScrollTarget
+
+        if (Math.abs(slider.scrollLeft - targetScrollLeft) < 2) {
+          programmaticScrollTargetRef.current = null
+        }
+
+        return
+      }
+
       const nextIndex = Math.round(slider.scrollLeft / slider.clientWidth)
       setCurrentCard(Math.max(0, Math.min(nextIndex, cards.length - 1)))
     }
@@ -69,7 +125,7 @@ function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) 
   }, [currentCard])
 
   return (
-    <div className="flex w-full max-w-[920px] flex-col gap-2">
+    <div className="flex w-full max-w-[720px] flex-col gap-2">
       <div className="space-y-1">
         <p className="text-md font-medium text-neutral-700">{title}</p>
         <div className="flex items-start justify-between gap-3">
@@ -83,8 +139,14 @@ function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) 
       <div className="relative">
         <div
           ref={sliderRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={() => {
+            touchStartRef.current = null
+          }}
           className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth rounded-xl border border-neutral-200 bg-neutral-50 scrollbar-none"
-          style={{ scrollbarWidth: 'none' }}
+          style={{ scrollbarWidth: 'none', touchAction: 'pan-y' }}
         >
           {cards.map((card) => (
             <div key={card.src} className="w-full shrink-0 snap-center">
@@ -102,7 +164,7 @@ function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) 
           type="button"
           onClick={() => scrollToCard(currentCard - 1)}
           disabled={currentCard === 0}
-          className="absolute inset-y-0 left-0 flex w-20 cursor-pointer items-center justify-start rounded-l-xl bg-gradient-to-r from-white/95 via-white/65 to-transparent pl-3 text-neutral-700 transition hover:from-white disabled:cursor-not-allowed disabled:opacity-30"
+          className="absolute inset-y-0 left-0 flex w-20 cursor-pointer items-center justify-start rounded-l-xl bg-transparent pl-3 text-neutral-700 transition disabled:cursor-not-allowed disabled:opacity-30 sm:bg-gradient-to-r sm:from-white/95 sm:via-white/65 sm:to-transparent sm:hover:from-white"
           aria-label={`${title} 이전 카드 보기`}
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-300 bg-white/95 shadow-sm">
@@ -114,7 +176,7 @@ function ManualCardSlider({ cards, title, description }: ManualCardSliderProps) 
           type="button"
           onClick={() => scrollToCard(currentCard + 1)}
           disabled={currentCard === cards.length - 1}
-          className="absolute inset-y-0 right-0 flex w-20 cursor-pointer items-center justify-end rounded-r-xl bg-gradient-to-l from-white/95 via-white/65 to-transparent pr-3 text-neutral-700 transition hover:from-white disabled:cursor-not-allowed disabled:opacity-30"
+          className="absolute inset-y-0 right-0 flex w-20 cursor-pointer items-center justify-end rounded-r-xl bg-transparent pr-3 text-neutral-700 transition disabled:cursor-not-allowed disabled:opacity-30 sm:bg-gradient-to-l sm:from-white/95 sm:via-white/65 sm:to-transparent sm:hover:from-white"
           aria-label={`${title} 다음 카드 보기`}
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-300 bg-white/95 shadow-sm">
@@ -153,21 +215,22 @@ export function OrientationContent() {
   return (
     <div className="mt-5 flex flex-col gap-4">
       
-      <div className="aspect-video w-full max-w-[920px] overflow-hidden">
-        <div className="space-y-1 mb-2">
-            <p className="text-md font-medium text-neutral-700">✅ 연구 절차 설명 (5분)</p>
-            <p className="text-sm text-neutral-500">
-              전체적인 연구 절차와 챗봇 도구의 사용 방법을 영상으로 안내드립니다. 중요한 안내사항이 포함되어 있으니 꼭 시청 부탁드립니다.
-            </p>
+      <div className="flex w-full max-w-[720px] flex-col gap-2">
+        <div className="space-y-1">
+          <p className="text-md font-medium text-neutral-700">✅ 연구 절차 설명 (5분)</p>
+          <p className="text-sm text-neutral-500">
+            전체적인 연구 절차와 챗봇 도구의 사용 방법을 영상으로 안내드립니다. 중요한 안내사항이 포함되어 있으니 꼭 시청 부탁드립니다.
+          </p>
         </div>
-        <iframe
-          className="h-full w-full"
-          src={videoSrc}
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-        
+        <div className="aspect-video w-full overflow-hidden">
+          <iframe
+            className="h-full w-full"
+            src={videoSrc}
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
       </div>
       <div className="space-y-1 mb-5">
         <a
